@@ -87,7 +87,7 @@ void saveUsersToFile(const string& filename, const vector<users>& users_list, in
 }
 // Дальше часть проекта
 // Часть Тамира
-int int main() {
+int main() {
     setlocale(LC_ALL, "Russian");
     srand(time(NULL));
 
