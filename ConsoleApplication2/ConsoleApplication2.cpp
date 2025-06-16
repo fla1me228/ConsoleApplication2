@@ -1,4 +1,5 @@
 ﻿// Моя часть 
+#include <iomanip>>
 #include <fstream>
 #include <iostream>
 #include <ctime>
@@ -85,6 +86,53 @@ void saveUsersToFile(const string& filename, const vector<users>& users_list, in
         cerr << "Error opening file for writing!" << endl;
     }
 }
+// Рендер таблицы и меню(структура)
+void RenderUsersTable(const vector<users>& users_list) {
+    cout << "==== Таблица пользователей ====" << endl;
+    cout << "| №  |        Логин        |      Пароль      |\n";
+    cout << "-----------------------------------------------\n";
+    for (size_t i = 0; i < users_list.size(); ++i) {
+        cout << "| " << setw(2) << i + 1 << " | "
+            << setw(18) << left << users_list[i].login << " | "
+            << setw(16) << left << users_list[i].password << " |\n";
+    }
+    cout << "-----------------------------------------------\n";
+}
+
+int RenderMenu() {
+    cout << "\n=== Главное меню ===\n";
+    cout << "1. Показать пользователей\n";
+    cout << "2. Удалить всех пользователей\n";
+    cout << "3. Удалить пользователя по логину\n";
+    cout << "4. Выйти\n";
+    cout << "Выберите пункт: ";
+    int choice;
+    cin >> choice;
+    cin.ignore();
+    return choice;
+}
+void DeleteAllUsers(vector<users>& users_list, const string& filename, int caesarKey) {
+    users_list.clear();
+    saveUsersToFile(filename, users_list, caesarKey);
+    cout << "Все пользователи удалены.\n";
+}
+void DeleteUserByLogin(vector<users>& users_list, const string& filename, int caesarKey) {
+    char login[32];
+    cout << "Введите логин пользователя для удаления: ";
+    cin.getline(login, 32);
+
+    auto it = std::remove_if(users_list.begin(), users_list.end(),
+        [&](const users& u) { return strcmp(u.login, login) == 0; });
+
+    if (it != users_list.end()) {
+        users_list.erase(it, users_list.end());
+        saveUsersToFile(filename, users_list, caesarKey);
+        cout << "Пользователь с логином '" << login << "' удалён.\n";
+    }
+    else {
+        cout << "Пользователь с таким логином не найден.\n";
+    }
+}
 // Дальше часть проекта
 // Часть Тамира
 int main() {
@@ -123,7 +171,6 @@ int main() {
     cout << "После редактирования: ";
     ShowArray(arr, size);
 
-    return 0;
 	// Метод шифрования и дешифрования Цезаря
     string filename = "users.txt";
     int caesarKey = 3;
@@ -135,19 +182,24 @@ int main() {
     cin.ignore();
 
     if (cursor == 1) {
-        users newUser;
-        cout << "Введите логин: ";
-        cin.getline(newUser.login, 32);
-        cout << "Введите пароль: ";
-        cin.getline(newUser.password, 32);
+        while (true) {
+            users newUser;
+            cout << "Введите логин (или 'end' для завершения): ";
+            cin.getline(newUser.login, 32);
+            if (strcmp(newUser.login, "end") == 0) {
+                break;
+            }
+            cout << "Введите пароль: ";
+            cin.getline(newUser.password, 32);
 
-        if (strlen(newUser.login) >= 32 || strlen(newUser.password) >= 32) {
-            cout << "Логин или пароль слишком длинные." << endl;
-        }
-        else {
-            users_list.push_back(newUser);
-            saveUsersToFile(filename, users_list, caesarKey);
-            cout << "Регистрация успешна!" << endl;
+            if (strlen(newUser.login) >= 32 || strlen(newUser.password) >= 32) {
+                cout << "Логин или пароль слишком длинные." << endl;
+            }
+            else {
+                users_list.push_back(newUser);
+                saveUsersToFile(filename, users_list, caesarKey);
+                cout << "Регистрация успешна!" << endl;
+            }
         }
     }
     else if (cursor == 2) {
@@ -180,5 +232,25 @@ int main() {
     else {
         cout << "Неверный выбор." << endl;
     }
-
+	// Рендер таблицы и меню
+    while (true) {
+        int choice = RenderMenu();
+        if (choice == 1) {
+            RenderUsersTable(users_list);
+        }
+        else if (choice == 2) {
+            DeleteAllUsers(users_list, filename, caesarKey);
+        }
+        else if (choice == 3) {
+            DeleteUserByLogin(users_list, filename, caesarKey);
+        }
+        else if (choice == 4) {
+            cout << "Выход из программы.\n";
+            break;
+        }
+        else {
+            cout << "Неверный выбор. Попробуйте снова.\n";
+        }
+    }
+    return 0;
 }
