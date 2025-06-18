@@ -252,5 +252,18 @@ int main() {
             cout << "Неверный выбор. Попробуйте снова.\n";
         }
     }
+	// Импорт данных из файла
+    fstream file("users.txt", ios::in);
+    if (!file.is_open()) {
+        cerr << "Ошибка открытия файла users.txt" << endl;
+        return 1;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        cout << line << endl;
+    }
+
+    file.close();
     return 0;
 }
